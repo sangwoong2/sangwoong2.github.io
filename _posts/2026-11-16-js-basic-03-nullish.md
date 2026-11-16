@@ -1,0 +1,341 @@
+---
+title: "[JS 기본 3] 없는 값 다루기"
+date: 2026-11-16 12:20:00 +0900
+categories: [JavaScript 기본편, 1부 값과 타입]
+tags: [javascript]
+---
+
+## 참 같은 값, 거짓 같은 값
+
+불리언이 필요한 자리에 불리언이 아닌 값이 오면 불리언으로 변환된다. 이때 `true` 로 변환되는 값을 참 같은 값(truthy), `false` 로 변환되는 값을 거짓 같은 값(falsy)이라고 한다.
+
+### 거짓 같은 값
+
+아래 값이 전부다.
+
+| 값 | 타입 |
+| --- | --- |
+| `false` | boolean |
+| `0`, `-0`, `NaN` | number |
+| `0n` | bigint |
+| `''` | string |
+| `null` | null |
+| `undefined` | undefined |
+
+### 참 같은 값
+
+거짓 같은 값이 아닌 모든 값이다. 아래 값들도 참 같은 값이다.
+
+```javascript
+console.log(Boolean('0'));      // true  (빈 문자열이 아니다)
+console.log(Boolean(' '));      // true  (공백도 글자다)
+console.log(Boolean('false'));  // true
+console.log(Boolean([]));       // true  (빈 배열)
+console.log(Boolean({}));       // true  (빈 객체)
+console.log(Boolean(-1));       // true
+```
+
+### 불리언이 필요한 자리
+
+`if` 와 `while` 의 조건, 삼항 연산자의 조건, `!`, `&&`, `||` 의 왼쪽이다.
+
+```javascript
+const name = '';
+
+if (name) {
+    console.log('이름 있음');
+} else {
+    console.log('이름 없음');   // 이쪽이 실행된다
+}
+```
+
+---
+
+## !
+
+논리 부정 연산자다. 값을 불리언으로 변환한 뒤 뒤집는다. 결과는 항상 `true` 또는 `false` 다.
+
+### 결과
+
+```javascript
+console.log(!true);     // false
+console.log(!0);        // true
+console.log(!'');       // true
+console.log(!'a');      // false
+console.log(!null);     // true
+console.log(!{});       // false
+```
+
+### 이중 부정
+
+`!` 를 두 번 쓰면 값을 불리언으로 변환한 결과가 된다. `Boolean()` 과 같다.
+
+```javascript
+console.log(!!'a');     // true
+console.log(!!0);       // false
+console.log(!![]);      // true
+console.log(!!null);    // false
+```
+
+---
+
+## &&
+
+논리곱 연산자다. 왼쪽이 거짓 같은 값이면 왼쪽 값을, 아니면 오른쪽 값을 돌려준다.
+
+### 반환값
+
+`true` / `false` 가 아니라 양쪽 값 중 하나를 그대로 돌려준다.
+
+```javascript
+console.log(1 && 2);        // 2
+console.log(0 && 2);        // 0
+console.log('' && 'x');     // ''
+console.log(null && 'x');   // null
+console.log('a' && 'b');    // 'b'
+```
+
+### 단락 평가
+
+왼쪽이 거짓 같은 값이면 오른쪽을 실행하지 않는다. 이것을 단락 평가라고 한다.
+
+```javascript
+const user = null;
+
+console.log(user && user.name);     // null  (user.name 을 읽지 않으므로 에러가 나지 않는다)
+```
+
+### 연속 사용
+
+왼쪽부터 차례로 보다가 처음 만난 거짓 같은 값을 돌려준다. 거짓 같은 값이 없으면 마지막 값을 돌려준다.
+
+```javascript
+console.log('a' && 'b' && 'c');     // 'c'
+console.log('a' && 0 && 'c');       // 0
+```
+
+---
+
+## ||
+
+논리합 연산자다. 왼쪽이 참 같은 값이면 왼쪽 값을, 아니면 오른쪽 값을 돌려준다.
+
+### 반환값
+
+양쪽 값 중 하나를 그대로 돌려준다.
+
+```javascript
+console.log(1 || 2);            // 1
+console.log(0 || 2);            // 2
+console.log('' || '기본값');    // '기본값'
+console.log(null || 'x');       // 'x'
+console.log('a' || 'b');        // 'a'
+```
+
+### 단락 평가
+
+왼쪽이 참 같은 값이면 오른쪽을 실행하지 않는다.
+
+```javascript
+const load = () => {
+    console.log('load 실행');
+    return [];
+};
+
+const rows = [1, 2] || load();      // load 는 실행되지 않는다
+```
+
+### 연속 사용
+
+왼쪽부터 차례로 보다가 처음 만난 참 같은 값을 돌려준다. 참 같은 값이 없으면 마지막 값을 돌려준다.
+
+```javascript
+console.log(0 || 'a' || 'b');       // 'a'
+console.log(0 || '' || null);       // null
+```
+
+---
+
+## ??
+
+널 병합 연산자다. 왼쪽이 `null` 또는 `undefined` 면 오른쪽 값을, 아니면 왼쪽 값을 돌려준다.
+
+### 반환값
+
+양쪽 값 중 하나를 그대로 돌려준다. `0`, `''`, `false` 는 `null` 도 `undefined` 도 아니므로 왼쪽 값이 그대로 나온다.
+
+```javascript
+console.log(null ?? 'x');           // 'x'
+console.log(undefined ?? 'x');      // 'x'
+console.log(0 ?? 10);               // 0
+console.log('' ?? '기본값');        // ''
+console.log(false ?? true);         // false
+```
+
+### 단락 평가
+
+왼쪽이 `null` 도 `undefined` 도 아니면 오른쪽을 실행하지 않는다.
+
+```javascript
+const load = () => {
+    console.log('load 실행');
+    return 0;
+};
+
+const qty = 0 ?? load();    // load 는 실행되지 않는다
+```
+
+### 연속 사용
+
+왼쪽부터 차례로 보다가 처음 만난 `null` 도 `undefined` 도 아닌 값을 돌려준다.
+
+```javascript
+console.log(null ?? undefined ?? 'c');  // 'c'
+console.log(null ?? 0 ?? 'c');          // 0
+```
+
+---
+
+## &&, ||, ?? 비교
+
+왼쪽 값에 따라 `왼쪽 연산자 'R'` 이 돌려주는 값이다.
+
+| 왼쪽 값 | `&&` | `||` | `??` |
+| --- | --- | --- | --- |
+| `0` | `0` | `'R'` | `0` |
+| `''` | `''` | `'R'` | `''` |
+| `false` | `false` | `'R'` | `false` |
+| `NaN` | `NaN` | `'R'` | `NaN` |
+| `null` | `null` | `'R'` | `'R'` |
+| `undefined` | `undefined` | `'R'` | `'R'` |
+| `'a'` | `'R'` | `'a'` | `'a'` |
+
+---
+
+## ?.
+
+옵셔널 체이닝 연산자다. 왼쪽이 `null` 또는 `undefined` 면 `undefined` 를 돌려주고, 아니면 이어지는 접근을 그대로 수행한다.
+
+### 속성 접근
+
+`객체?.속성` 으로 쓴다.
+
+```javascript
+const user = null;
+console.log(user?.name);        // undefined
+console.log(user.name);         // TypeError: Cannot read properties of null (reading 'name')
+```
+
+```javascript
+const user = { name: '홍길동' };
+console.log(user?.name);        // '홍길동'
+console.log(user?.dept?.name);  // undefined  (user.dept 가 undefined 다)
+```
+
+### 대괄호 접근
+
+`객체?.[키]` 로 쓴다. 배열의 인덱스에도 쓴다.
+
+```javascript
+const user = null;
+const key = 'name';
+console.log(user?.[key]);       // undefined
+
+const rows = null;
+console.log(rows?.[0]);         // undefined
+```
+
+### 함수 호출
+
+`함수?.()` 로 쓴다. 함수가 `null` 또는 `undefined` 면 호출하지 않고 `undefined` 를 돌려준다.
+
+```javascript
+const option = {};
+
+console.log(option.onChange?.());   // undefined
+console.log(option.onChange());     // TypeError: option.onChange is not a function
+```
+
+`null` 도 `undefined` 도 아닌데 함수가 아니면 에러가 난다.
+
+```javascript
+const option = { onChange: 1 };
+console.log(option.onChange?.());   // TypeError: option.onChange is not a function
+```
+
+### 단락 평가
+
+왼쪽이 `null` 또는 `undefined` 면 그 뒤에 이어진 접근 전체를 실행하지 않는다.
+
+```javascript
+const user = null;
+console.log(user?.dept.name);   // undefined  (.dept.name 전체를 건너뛴다)
+```
+
+`?.` 는 바로 왼쪽 값만 검사한다. 그 뒤의 값이 `undefined` 인 것은 막지 못한다.
+
+```javascript
+const user = {};
+console.log(user?.dept.name);   // TypeError: Cannot read properties of undefined (reading 'name')
+console.log(user?.dept?.name);  // undefined
+```
+
+### 할당
+
+`?.` 의 결과에 값을 넣을 수 없다.
+
+```javascript
+user?.name = '홍길동';      // SyntaxError: Invalid left-hand side in assignment
+```
+
+---
+
+## 연산자 조합
+
+### ?. 와 ??
+
+`?.` 의 결과가 `undefined` 일 때 대신 쓸 값을 `??` 로 정한다.
+
+```javascript
+const user = null;
+console.log(user?.name ?? '없음');      // '없음'
+```
+
+`??` 대신 `||` 를 쓰면 빈 문자열과 `0` 도 대신 쓸 값으로 바뀐다.
+
+```javascript
+const user = { name: '' };
+console.log(user?.name ?? '없음');      // ''
+console.log(user?.name || '없음');      // '없음'
+```
+
+### && 와 ||
+
+`&&` 가 `||` 보다 먼저 계산된다.
+
+```javascript
+console.log(1 || 0 && 0);       // 1  (0 && 0 을 먼저 계산한다)
+console.log((1 || 0) && 0);     // 0
+```
+
+### ?? 와 &&, ||
+
+괄호 없이 함께 쓸 수 없다.
+
+```javascript
+null || undefined ?? 'x';       // SyntaxError: Unexpected token '??'
+(null || undefined) ?? 'x';     // 'x'
+```
+
+---
+
+## 정리
+
+- 거짓 같은 값: `false`, `0`, `-0`, `NaN`, `0n`, `''`, `null`, `undefined`. 불리언이 필요한 자리에서 `false` 로 변환된다.
+- 참 같은 값: 나머지 모든 값. `'0'`, `[]`, `{}` 도 참 같은 값이다.
+- `!`: 불리언으로 변환한 뒤 뒤집는다. `!!` 는 불리언으로 변환한 결과다.
+- `&&`: 왼쪽이 거짓 같은 값이면 왼쪽, 아니면 오른쪽을 돌려준다.
+- `||`: 왼쪽이 참 같은 값이면 왼쪽, 아니면 오른쪽을 돌려준다.
+- `??`: 왼쪽이 `null` 또는 `undefined` 면 오른쪽, 아니면 왼쪽을 돌려준다.
+- 단락 평가: 왼쪽 값으로 결과가 정해지면 오른쪽을 실행하지 않는 것.
+- `?.`: 왼쪽이 `null` 또는 `undefined` 면 `undefined` 를 돌려주고 뒤의 접근을 건너뛴다.
