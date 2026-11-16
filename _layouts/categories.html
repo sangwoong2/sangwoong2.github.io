@@ -18,7 +18,11 @@ layout: page
   {% if category_name == first_post.categories[0] %}
     {% assign sub_categories = "" | split: "" %}
 
-    {% for post in posts_of_category %}
+    <!-- 하위 카테고리는 이름순이 아니라 글을 쓴 순서(가장 오래된 글 기준)로 나열한다.
+         이름순이면 "10. ..." 이 "1. ..." 보다 앞에 온다. -->
+    {% assign posts_by_date = posts_of_category | sort: 'date' %}
+
+    {% for post in posts_by_date %}
       {% assign second_category = post.categories[1] %}
       {% if second_category %}
         {% unless sub_categories contains second_category %}
@@ -27,7 +31,6 @@ layout: page
       {% endif %}
     {% endfor %}
 
-    {% assign sub_categories = sub_categories | sort %}
     {% assign sub_categories_size = sub_categories | size %}
 
   <div class="card categories">

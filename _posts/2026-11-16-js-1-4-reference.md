@@ -1,8 +1,7 @@
 ---
-title: "[JS 기본 4] 참조와 복사"
+title: "1-4. 참조와 복사"
 date: 2026-11-16 12:30:00 +0900
-categories: [JavaScript 기본편, 1부 값과 타입]
-tags: [javascript]
+categories: [JS, 1. 값과 타입]
 ---
 
 ## 참조

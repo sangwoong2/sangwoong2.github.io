@@ -11,7 +11,9 @@ layout: page
   </h1>
 
   <ul class="post-content pl-0">
-    {% for post in page.posts %}
+    <!-- 글 번호 순서(1-1, 1-2, ...)로 보이도록 오래된 글부터 나열한다. -->
+    {% assign posts_by_date = page.posts | sort: 'date' %}
+    {% for post in posts_by_date %}
     <li class="d-flex justify-content-between pl-md-3 pr-md-3">
       <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
       <span class="dash flex-grow-1"></span>
