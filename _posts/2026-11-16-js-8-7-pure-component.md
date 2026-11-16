@@ -72,6 +72,7 @@ this.setState({ rows: [...this.state.rows, newRow] });
 
 `render` 안에서 만든 함수와 객체는 그릴 때마다 새로 만들어진다. 참조가 매번 달라서 PureComponent 여도 항상 다시 그려진다.
 
+{% raw %}
 ```jsx
 render() {
     return (
@@ -82,6 +83,7 @@ render() {
     );
 }
 ```
+{% endraw %}
 
 필드에 담아 둔 함수와 객체는 참조가 유지된다.
 
