@@ -1,0 +1,412 @@
+---
+title: "[JS 기본 6] 숫자와 금액 계산"
+date: 2026-11-16 12:50:00 +0900
+categories: [JavaScript 기본편, 2부 문자열·숫자·날짜]
+tags: [javascript]
+---
+
+## number
+
+숫자를 나타내는 타입이다. 모든 숫자를 64비트 부동소수점 하나의 형식으로 저장한다.
+
+### 정수와 실수
+
+구분하지 않는다. `1` 과 `1.0` 은 같은 값이다.
+
+```javascript
+console.log(1 === 1.0);     // true
+console.log(typeof 1);      // 'number'
+console.log(typeof 1.5);    // 'number'
+```
+
+### 안전한 정수 범위
+
+오차 없이 표현할 수 있는 정수는 `9007199254740991`(2의 53제곱 - 1)까지다. `Number.MAX_SAFE_INTEGER` 에 들어 있다. 이 범위를 넘으면 정수 계산도 틀린다.
+
+```javascript
+console.log(Number.MAX_SAFE_INTEGER);       // 9007199254740991
+console.log(9007199254740991 + 2);          // 9007199254740992
+```
+
+### Infinity
+
+무한대를 나타내는 값이다. 0 이 아닌 수를 0 으로 나누면 나온다. 에러가 나지 않는다.
+
+```javascript
+console.log(1 / 0);     // Infinity
+console.log(-1 / 0);    // -Infinity
+console.log(0 / 0);     // NaN
+```
+
+---
+
+## 산술 연산자
+
+### 사칙연산
+
+`+`, `-`, `*`, `/` 다. 나눗셈의 결과는 정수로 잘리지 않는다.
+
+```javascript
+console.log(7 / 2);                 // 3.5
+console.log(Math.floor(7 / 2));     // 3
+```
+
+### 나머지
+
+`%` 다. 결과의 부호는 왼쪽 값의 부호를 따른다.
+
+```javascript
+console.log(10 % 3);    // 1
+console.log(-10 % 3);   // -1
+```
+
+### 거듭제곱
+
+`**` 다. `Math.pow` 와 같다.
+
+```javascript
+console.log(2 ** 10);           // 1024
+console.log(Math.pow(2, 10));   // 1024
+```
+
+### 증감
+
+`++` 는 1 을 더하고 `--` 는 1 을 뺀다. 변수 뒤에 붙이면 바꾸기 전의 값을, 앞에 붙이면 바꾼 뒤의 값을 돌려준다.
+
+```javascript
+let a = 1;
+const b = a++;
+
+console.log(a);     // 2
+console.log(b);     // 1
+```
+
+```javascript
+let a = 1;
+const b = ++a;
+
+console.log(a);     // 2
+console.log(b);     // 2
+```
+
+### 복합 할당
+
+`+=`, `-=`, `*=`, `/=` 는 계산한 결과를 왼쪽 변수에 다시 할당한다. `a += 5` 는 `a = a + 5` 와 같다.
+
+```javascript
+let a = 10;
+a += 5;     // 15
+a -= 3;     // 12
+a *= 2;     // 24
+a /= 4;     // 6
+
+console.log(a);     // 6
+```
+
+---
+
+## 숫자로 변환
+
+### Number
+
+`Number(값)` 은 문자열 전체가 숫자일 때만 숫자로 바꾼다. 숫자가 아닌 글자가 하나라도 있으면 `NaN` 이다. 빈 문자열은 `0` 이다.
+
+```javascript
+console.log(Number('12'));      // 12
+console.log(Number('12.5'));    // 12.5
+console.log(Number(' 12 '));    // 12   (앞뒤 공백은 무시한다)
+console.log(Number(''));        // 0
+console.log(Number('12px'));    // NaN
+console.log(Number('1,234'));   // NaN
+```
+
+### parseInt
+
+`parseInt(문자열)` 은 앞에서부터 숫자로 읽을 수 있는 데까지만 읽어 정수로 바꾼다. 소수점 아래는 버린다. 첫 글자부터 숫자가 아니면 `NaN` 이다.
+
+```javascript
+console.log(parseInt('12'));        // 12
+console.log(parseInt('12.9'));      // 12
+console.log(parseInt('12px'));      // 12
+console.log(parseInt('1,234'));     // 1
+console.log(parseInt('px12'));      // NaN
+console.log(parseInt(''));          // NaN
+```
+
+### Number, parseInt 비교
+
+| 값 | `Number` | `parseInt` |
+| --- | --- | --- |
+| `'12'` | `12` | `12` |
+| `'12.9'` | `12.9` | `12` |
+| `'12px'` | `NaN` | `12` |
+| `'1,234'` | `NaN` | `1` |
+| `''` | `0` | `NaN` |
+
+### 쉼표가 있는 문자열
+
+쉼표를 없앤 뒤 변환한다.
+
+```javascript
+console.log(Number('1,234'.replace(/,/g, '')));     // 1234
+```
+
+---
+
+## NaN
+
+"숫자가 아님"을 나타내는 number 타입의 값이다.
+
+### 생기는 경우
+
+숫자로 바꿀 수 없는 값을 변환하거나, 결과를 숫자로 나타낼 수 없는 계산을 하면 나온다.
+
+```javascript
+console.log(Number('abc'));     // NaN
+console.log(0 / 0);             // NaN
+console.log(undefined + 1);     // NaN
+```
+
+### 전파
+
+`NaN` 이 들어간 계산의 결과는 `NaN` 이다.
+
+```javascript
+console.log(NaN + 1);               // NaN
+console.log(Number('abc') * 2);     // NaN
+```
+
+### 비교
+
+자기 자신과도 같지 않다.
+
+```javascript
+console.log(NaN === NaN);   // false
+```
+
+### isNaN
+
+`isNaN(값)` 은 값을 숫자로 변환한 뒤 그 결과가 `NaN` 이면 `true` 다.
+
+```javascript
+console.log(isNaN(NaN));        // true
+console.log(isNaN('abc'));      // true   ('abc' → NaN)
+console.log(isNaN('12'));       // false  ('12' → 12)
+console.log(isNaN(''));         // false  ('' → 0)
+console.log(isNaN(undefined));  // true   (undefined → NaN)
+```
+
+### Number.isNaN
+
+`Number.isNaN(값)` 은 변환하지 않는다. 값이 `NaN` 그 자체일 때만 `true` 다.
+
+```javascript
+console.log(Number.isNaN(NaN));         // true
+console.log(Number.isNaN('abc'));       // false
+console.log(Number.isNaN(undefined));   // false
+```
+
+---
+
+## 소수점 오차
+
+소수 계산의 결과가 기대한 값과 조금 다르게 나오는 것이다.
+
+### 원인
+
+number 는 숫자를 2진수로 저장한다. `0.1` 처럼 2진수로 정확히 표현할 수 없는 소수는 가장 가까운 값으로 저장되고, 그 차이가 계산 결과에 나타난다.
+
+```javascript
+console.log(0.1 + 0.2);             // 0.30000000000000004
+console.log(0.1 + 0.2 === 0.3);     // false
+```
+
+### 곱셈과 나눗셈
+
+덧셈뿐 아니라 곱셈과 나눗셈에서도 생긴다.
+
+```javascript
+console.log(0.57 * 100);    // 56.99999999999999
+console.log(19.9 * 100);    // 1989.9999999999998
+console.log(100 * 1.1);     // 110.00000000000001
+console.log(0.3 / 0.1);     // 2.9999999999999996
+```
+
+### 정수 계산
+
+안전한 정수 범위 안의 정수끼리 더하고 빼고 곱하는 계산에는 오차가 없다.
+
+```javascript
+console.log((0.1 * 10 + 0.2 * 10) / 10);    // 0.3
+```
+
+---
+
+## 반올림, 올림, 내림
+
+### Math.round
+
+소수 첫째 자리에서 반올림해 정수를 돌려준다. `.5` 는 큰 쪽으로 간다.
+
+```javascript
+console.log(Math.round(1.4));   // 1
+console.log(Math.round(1.5));   // 2
+console.log(Math.round(-1.5));  // -1
+console.log(Math.round(-1.6));  // -2
+```
+
+### Math.floor
+
+내림이다. 그 값보다 크지 않은 가장 큰 정수를 돌려준다.
+
+```javascript
+console.log(Math.floor(1.9));   // 1
+console.log(Math.floor(-1.1));  // -2
+```
+
+### Math.ceil
+
+올림이다. 그 값보다 작지 않은 가장 작은 정수를 돌려준다.
+
+```javascript
+console.log(Math.ceil(1.1));    // 2
+console.log(Math.ceil(-1.9));   // -1
+```
+
+### 자릿수 지정
+
+원하는 자리가 소수 첫째 자리에 오도록 곱하거나 나눈 뒤, 반올림하고 되돌린다.
+
+```javascript
+console.log(Math.round(1234.567 * 100) / 100);  // 1234.57  (소수 둘째 자리까지)
+console.log(Math.round(1234.567));              // 1235     (정수)
+console.log(Math.round(1234.567 / 10) * 10);    // 1230     (십의 자리까지)
+console.log(Math.floor(1234.567 * 100) / 100);  // 1234.56  (소수 셋째 자리에서 내림)
+```
+
+### 자릿수 반올림의 오차
+
+곱하는 단계에서 소수점 오차가 생기면 반올림 결과가 달라진다.
+
+```javascript
+console.log(1.005 * 100);                       // 100.49999999999999
+console.log(Math.round(1.005 * 100) / 100);     // 1  (1.01 이 아니다)
+console.log(Math.round(1.255 * 100) / 100);     // 1.25  (1.26 이 아니다)
+```
+
+---
+
+## toFixed
+
+`숫자.toFixed(자릿수)` 는 소수점 아래를 지정한 자릿수로 맞춘 **문자열**을 돌려준다.
+
+### 반환값
+
+문자열이다. 그대로 `+` 를 쓰면 문자열 연결이 된다.
+
+```javascript
+console.log((1234.567).toFixed(2));             // '1234.57'
+console.log(typeof (1234.567).toFixed(2));      // 'string'
+console.log((1234.567).toFixed(2) + 1);         // '1234.571'
+```
+
+### 자릿수 채움
+
+자릿수가 모자라면 `0` 으로 채운다.
+
+```javascript
+console.log((1234.5).toFixed(2));   // '1234.50'
+console.log((1234).toFixed(2));     // '1234.00'
+```
+
+### 반올림 오차
+
+저장된 값이 표기한 값보다 조금 작으면 내려간다.
+
+```javascript
+console.log((1.005).toFixed(2));    // '1.00'
+console.log((2.675).toFixed(2));    // '2.67'
+```
+
+### 숫자로 되돌리기
+
+`Number()` 로 감싼다.
+
+```javascript
+console.log(Number((1234.567).toFixed(2)));         // 1234.57
+console.log(Number((1234.567).toFixed(2)) + 1);     // 1235.57
+```
+
+---
+
+## Math
+
+수학 계산 함수를 모아 둔 객체다.
+
+### abs
+
+절댓값이다.
+
+```javascript
+console.log(Math.abs(-5));  // 5
+```
+
+### max, min
+
+인자 중 가장 큰 값, 가장 작은 값이다. 배열은 스프레드로 펼쳐서 넘긴다.
+
+```javascript
+console.log(Math.max(1, 5, 3));         // 5
+console.log(Math.min(1, 5, 3));         // 1
+console.log(Math.max(...[1, 5, 3]));    // 5
+```
+
+인자가 없으면 `Math.max` 는 `-Infinity`, `Math.min` 은 `Infinity` 다. 숫자로 바꿀 수 없는 인자가 있으면 `NaN` 이다.
+
+```javascript
+console.log(Math.max());            // -Infinity
+console.log(Math.max(1, 'a'));      // NaN
+```
+
+---
+
+## 표시
+
+### toLocaleString
+
+`숫자.toLocaleString()` 은 천 단위 구분 기호를 넣은 문자열을 돌려준다.
+
+```javascript
+console.log((1234567).toLocaleString());        // '1,234,567'
+console.log((1234567.891).toLocaleString());    // '1,234,567.891'
+```
+
+소수 자릿수는 옵션으로 정한다.
+
+```javascript
+console.log((1234567.891).toLocaleString('ko-KR', { maximumFractionDigits: 2 }));   // '1,234,567.89'
+console.log((1234.5).toLocaleString('ko-KR', { minimumFractionDigits: 2 }));        // '1,234.50'
+```
+
+### 정규식
+
+숫자를 문자열로 바꾼 뒤 세 자리마다 쉼표를 넣는다.
+
+```javascript
+console.log('1234567'.replace(/\B(?=(\d{3})+(?!\d))/g, ','));   // '1,234,567'
+```
+
+---
+
+## 정리
+
+- number: 숫자 타입. 정수와 실수를 구분하지 않고 64비트 부동소수점으로 저장한다.
+- 산술 연산자: `+` `-` `*` `/` `%` `**`. 나눗셈은 정수로 잘리지 않는다.
+- `Number()`: 문자열 전체가 숫자일 때만 변환한다. 빈 문자열은 `0` 이다.
+- `parseInt()`: 앞에서부터 읽을 수 있는 데까지 읽어 정수로 변환한다.
+- `NaN`: 숫자가 아님. 계산에 들어가면 결과도 `NaN` 이고, 자기 자신과도 같지 않다.
+- `isNaN`: 숫자로 변환한 뒤 검사한다. `Number.isNaN` 은 변환 없이 검사한다.
+- 소수점 오차: 2진수로 정확히 표현할 수 없는 소수 때문에 생기는 계산 결과의 차이.
+- `Math.round`, `Math.floor`, `Math.ceil`: 반올림, 내림, 올림. 정수를 돌려준다.
+- `toFixed`: 소수 자릿수를 맞춘 문자열을 돌려준다.
+- `toLocaleString`: 천 단위 구분 기호를 넣은 문자열을 돌려준다.
