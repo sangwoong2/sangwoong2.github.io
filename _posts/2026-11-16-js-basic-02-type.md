@@ -1,0 +1,553 @@
+---
+title: "[JS 기본 2] 타입과 비교"
+date: 2026-11-16 12:10:00 +0900
+categories: [JavaScript 기본편, 1부 값과 타입]
+tags: [javascript]
+---
+
+## 타입
+
+타입은 값의 종류다. 모든 값은 타입을 하나 갖는다.
+
+### 종류
+
+여덟 가지다.
+
+| 타입 | 값의 예 | 나타내는 것 |
+| --- | --- | --- |
+| number | `1`, `1.5`, `NaN` | 숫자. 정수와 실수를 구분하지 않는다 |
+| string | `'abc'`, `""` | 문자열 |
+| boolean | `true`, `false` | 참과 거짓 |
+| undefined | `undefined` | 값이 정해지지 않음 |
+| null | `null` | 값이 없음 |
+| bigint | `10n` | number 로 표현할 수 없는 큰 정수 |
+| symbol | `Symbol('a')` | 다른 어떤 값과도 같지 않은 고유한 값 |
+| object | `{ }`, `[ ]`, 함수 | 속성의 묶음 |
+
+### 기본형
+
+object 를 제외한 일곱 타입이다. 값 하나를 나타내고, 만들어진 값의 내용을 바꿀 수 없다.
+
+```javascript
+const name = 'abc';
+const upper = name.toUpperCase();
+
+console.log(upper);     // 'ABC'
+console.log(name);      // 'abc'
+```
+
+`toUpperCase` 는 `name` 의 내용을 바꾸지 않고 새 문자열을 만들어 돌려준다.
+
+### 객체
+
+기본형이 아닌 모든 값이다. 속성의 묶음이고, 만들어진 뒤에 내용을 바꿀 수 있다. 배열, 함수, 날짜도 객체다.
+
+```javascript
+const user = { name: '홍길동' };
+user.name = '김철수';
+
+console.log(user.name); // '김철수'
+```
+
+---
+
+## typeof
+
+값의 타입 이름을 문자열로 돌려주는 연산자다.
+
+### 결과
+
+| 식 | 결과 |
+| --- | --- |
+| `typeof 1` | `'number'` |
+| `typeof NaN` | `'number'` |
+| `typeof 'a'` | `'string'` |
+| `typeof true` | `'boolean'` |
+| `typeof undefined` | `'undefined'` |
+| `typeof 10n` | `'bigint'` |
+| `typeof Symbol('a')` | `'symbol'` |
+| `typeof {}` | `'object'` |
+
+아래 네 가지는 결과를 따로 알아 둬야 한다.
+
+### null
+
+`'object'` 다. 처음 만들어질 때의 오류가 그대로 남은 것이다. `null` 인지는 `===` 로 확인한다.
+
+```javascript
+console.log(typeof null);       // 'object'
+
+const value = null;
+console.log(value === null);    // true
+```
+
+### 배열
+
+`'object'` 다. 배열은 객체이기 때문이다. 배열인지는 `Array.isArray` 로 확인한다.
+
+```javascript
+console.log(typeof []);             // 'object'
+console.log(Array.isArray([]));     // true
+console.log(Array.isArray({}));     // false
+```
+
+### 함수
+
+`'function'` 이다. 함수는 객체지만 `typeof` 는 함수를 따로 구분해서 알려 준다. 클래스도 `'function'` 이다.
+
+```javascript
+console.log(typeof (() => {}));     // 'function'
+console.log(typeof class A {});     // 'function'
+```
+
+### 선언되지 않은 변수
+
+`'undefined'` 다. 에러가 나지 않는다.
+
+```javascript
+console.log(typeof notDeclared);    // 'undefined'
+```
+
+---
+
+## undefined
+
+값이 정해지지 않았음을 나타내는 값이다. undefined 타입의 값은 `undefined` 하나뿐이다.
+
+### 생기는 경우
+
+값을 넣지 않은 자리를 읽으면 엔진이 `undefined` 를 돌려준다.
+
+```javascript
+let a;
+console.log(a);                 // undefined  (초기값 없는 변수)
+
+const user = { name: '홍길동' };
+console.log(user.age);          // undefined  (없는 속성)
+
+const rows = [1, 2];
+console.log(rows[5]);           // undefined  (없는 인덱스)
+
+function show(x) {
+    console.log(x);             // undefined  (넘기지 않은 인자)
+}
+show();
+
+function nothing() { }
+console.log(nothing());         // undefined  (return 이 없는 함수의 결과)
+```
+
+### 속성 접근
+
+`undefined` 의 속성을 읽으면 에러가 난다.
+
+```javascript
+const user = { name: '홍길동' };
+
+console.log(user.dept);         // undefined
+console.log(user.dept.name);    // TypeError: Cannot read properties of undefined (reading 'name')
+```
+
+---
+
+## null
+
+값이 없음을 나타내는 값이다. null 타입의 값은 `null` 하나뿐이다.
+
+### 생기는 경우
+
+엔진이 자동으로 넣지 않는다. 코드에서 직접 넣거나, 외부에서 받은 데이터에 들어 있다.
+
+```javascript
+let selected = null;                        // 직접 넣은 경우
+
+const data = JSON.parse('{"deptCd": null}');
+console.log(data.deptCd);                   // null  (JSON 의 null)
+```
+
+### 속성 접근
+
+`null` 의 속성을 읽으면 에러가 난다.
+
+```javascript
+const user = null;
+console.log(user.name);     // TypeError: Cannot read properties of null (reading 'name')
+```
+
+---
+
+## undefined, null 비교
+
+| | `undefined` | `null` |
+| --- | --- | --- |
+| 의미 | 값이 정해지지 않음 | 값이 없음 |
+| 넣는 주체 | 엔진, 코드 | 코드 |
+| `typeof` | `'undefined'` | `'object'` |
+| 숫자로 변환 | `NaN` | `0` |
+| 문자열로 변환 | `'undefined'` | `'null'` |
+| JSON 으로 변환 | 속성이 빠진다 | `null` 로 남는다 |
+
+```javascript
+console.log(JSON.stringify({ a: undefined, b: null }));     // '{"b":null}'
+```
+
+---
+
+## 형변환
+
+형변환은 값을 다른 타입의 값으로 바꾸는 것이다. 원래 값이 바뀌는 것이 아니라 새 값이 만들어진다.
+
+### 명시적 형변환
+
+코드에서 변환 함수를 직접 호출하는 것이다.
+
+```javascript
+console.log(Number('12'));      // 12
+console.log(String(12));        // '12'
+console.log(Boolean(1));        // true
+```
+
+### 암묵적 형변환
+
+연산자가 필요한 타입으로 값을 자동으로 바꾸는 것이다.
+
+```javascript
+console.log('5' - 1);       // 4     ('5' 가 숫자로 바뀐다)
+console.log('5' + 1);       // '51'  (1 이 문자열로 바뀐다)
+```
+
+---
+
+## 숫자로 변환
+
+### 변환 규칙
+
+| 값 | 결과 |
+| --- | --- |
+| `'12'` | `12` |
+| `'12.5'` | `12.5` |
+| `''` | `0` |
+| `' '` | `0` |
+| `'12px'` | `NaN` |
+| `'abc'` | `NaN` |
+| `true` | `1` |
+| `false` | `0` |
+| `null` | `0` |
+| `undefined` | `NaN` |
+
+`NaN` 은 "숫자가 아님"을 나타내는 number 타입의 값이다. 숫자로 바꿀 수 없을 때 나온다.
+
+객체는 먼저 문자열로 바뀐 뒤 그 문자열이 숫자로 바뀐다.
+
+```javascript
+console.log(Number([]));        // 0    ([] → '' → 0)
+console.log(Number([5]));       // 5    ([5] → '5' → 5)
+console.log(Number({}));        // NaN  ({} → '[object Object]' → NaN)
+```
+
+### 일어나는 곳
+
+`Number()`, 단항 `+`, 산술 연산자 `-` `*` `/`, 그리고 한쪽이 숫자인 대소 비교에서 일어난다.
+
+```javascript
+console.log(Number('5'));   // 5
+console.log(+'5');          // 5
+console.log('5' - 1);       // 4
+console.log('5' * '2');     // 10
+console.log('a' - 1);       // NaN
+console.log(true + 1);      // 2
+console.log(null + 1);      // 1
+console.log(undefined + 1); // NaN
+console.log(1 < '2');       // true
+```
+
+---
+
+## 문자열로 변환
+
+### 변환 규칙
+
+| 값 | 결과 |
+| --- | --- |
+| `12` | `'12'` |
+| `true` | `'true'` |
+| `null` | `'null'` |
+| `undefined` | `'undefined'` |
+| `[1, 2]` | `'1,2'` |
+| `{}` | `'[object Object]'` |
+
+### 일어나는 곳
+
+`String()`, 한쪽이 문자열인 `+`, 템플릿 문자열에서 일어난다.
+
+```javascript
+console.log(String(12));            // '12'
+console.log('값: ' + 12);           // '값: 12'
+console.log('값: ' + null);         // '값: null'
+console.log('값: ' + undefined);    // '값: undefined'
+console.log(`${1 + 1}건`);          // '2건'
+```
+
+---
+
+## 불리언으로 변환
+
+### 변환 규칙
+
+`false`, `0`, `''`, `null`, `undefined`, `NaN` 은 `false` 가 되고, 나머지 값은 모두 `true` 가 된다.
+
+```javascript
+console.log(Boolean(0));        // false
+console.log(Boolean(''));       // false
+console.log(Boolean(null));     // false
+console.log(Boolean('0'));      // true
+console.log(Boolean({}));       // true
+```
+
+### 일어나는 곳
+
+`Boolean()`, `if` 의 조건, `!`, `&&`, `||`, 삼항 연산자의 조건에서 일어난다. 3번 글 "없는 값 다루기"에서 다룬다.
+
+---
+
+## + 연산자
+
+숫자 덧셈과 문자열 연결을 함께 맡는 연산자다. 양쪽 값의 타입에 따라 어느 쪽으로 동작할지가 정해진다.
+
+### 숫자 덧셈
+
+양쪽 모두 문자열이 아니면 숫자로 바꿔서 더한다.
+
+```javascript
+console.log(1 + 2);         // 3
+console.log(true + 1);      // 2
+console.log(null + 1);      // 1
+```
+
+### 문자열 연결
+
+한쪽이라도 문자열이면 다른 쪽을 문자열로 바꿔서 잇는다.
+
+```javascript
+console.log('1' + 1);       // '11'
+console.log(1 + '1');       // '11'
+```
+
+### 계산 순서
+
+왼쪽부터 두 개씩 계산한다. 문자열을 만나기 전까지는 덧셈이고, 만난 뒤부터는 연결이다.
+
+```javascript
+console.log(1 + 2 + '3');   // '33'   (1 + 2 = 3, 3 + '3' = '33')
+console.log('1' + 2 + 3);   // '123'  ('1' + 2 = '12', '12' + 3 = '123')
+```
+
+---
+
+## 대소 비교 연산자
+
+`<`, `>`, `<=`, `>=` 다. 양쪽 값의 타입에 따라 비교 방식이 정해진다.
+
+### 숫자 비교
+
+한쪽이라도 문자열이 아니면 양쪽을 숫자로 바꿔서 비교한다.
+
+```javascript
+console.log(10 < 9);        // false
+console.log(1 < '2');       // true   ('2' 가 숫자로 바뀐다)
+```
+
+### 문자열 비교
+
+양쪽 모두 문자열이면 숫자로 바꾸지 않고 앞 글자부터 차례로 비교한다.
+
+```javascript
+console.log('b' > 'a');     // true
+console.log('10' < '9');    // true   ('1' 이 '9' 보다 앞이다)
+```
+
+---
+
+## ===
+
+일치 비교 연산자다. 양쪽의 타입과 값이 모두 같으면 `true` 다.
+
+### 형변환
+
+하지 않는다. 타입이 다르면 `false` 다.
+
+```javascript
+console.log('1' === 1);     // false
+console.log(true === 1);    // false
+```
+
+### 기본형
+
+값이 같으면 `true` 다.
+
+```javascript
+console.log(1 === 1);       // true
+console.log('a' === 'a');   // true
+```
+
+### 객체
+
+양쪽이 같은 객체일 때만 `true` 다. 내용이 같아도 따로 만든 객체면 `false` 다.
+
+```javascript
+console.log({} === {});     // false
+console.log([] === []);     // false
+
+const a = {};
+const b = a;
+console.log(a === b);       // true
+```
+
+### null 과 undefined
+
+서로 다른 타입이므로 `false` 다.
+
+```javascript
+console.log(null === undefined);    // false
+console.log(null === null);         // true
+```
+
+### NaN
+
+`NaN` 은 자기 자신과도 같지 않다. `NaN` 인지는 `Number.isNaN` 으로 확인한다.
+
+```javascript
+console.log(NaN === NaN);           // false
+console.log(Number.isNaN(NaN));     // true
+```
+
+---
+
+## ==
+
+동등 비교 연산자다. 양쪽의 타입이 같으면 `===` 와 같고, 타입이 다르면 형변환을 한 뒤 비교한다.
+
+### 형변환
+
+한다. 규칙은 네 가지다.
+
+| 양쪽 값 | 비교 방식 |
+| --- | --- |
+| `null` 과 `undefined` | 서로 같다. 다른 값과는 같지 않다 |
+| 숫자와 문자열 | 문자열을 숫자로 바꾼다 |
+| 불리언과 다른 값 | 불리언을 숫자로 바꾼다 |
+| 객체와 기본형 | 객체를 기본형으로 바꾼다 |
+
+### 기본형
+
+형변환을 한 결과가 같으면 `true` 다.
+
+```javascript
+console.log('1' == 1);          // true   ('1' → 1)
+console.log(true == 1);         // true   (true → 1)
+console.log(true == 'true');    // false  (true → 1, 'true' → NaN)
+console.log('' == 0);           // true   ('' → 0)
+console.log('0' == 0);          // true   ('0' → 0)
+console.log('' == '0');         // false  (타입이 같으므로 형변환 없이 비교)
+```
+
+### 객체
+
+양쪽 모두 객체면 `===` 와 같다. 한쪽이 기본형이면 객체를 기본형으로 바꾼 뒤 비교한다.
+
+```javascript
+console.log({} == {});      // false
+console.log([1] == 1);      // true   ([1] → '1' → 1)
+console.log([] == '');      // true   ([] → '')
+```
+
+### null 과 undefined
+
+서로 같다. 다른 값과는 같지 않다.
+
+```javascript
+console.log(null == undefined);     // true
+console.log(null == 0);             // false
+console.log(null == '');            // false
+console.log(null == false);         // false
+```
+
+### NaN
+
+`===` 와 같이 자기 자신과도 같지 않다.
+
+```javascript
+console.log(NaN == NaN);    // false
+```
+
+---
+
+## ===, == 비교
+
+| 식 | `===` | `==` |
+| --- | --- | --- |
+| `'1'` 과 `1` | `false` | `true` |
+| `true` 와 `1` | `false` | `true` |
+| `''` 과 `0` | `false` | `true` |
+| `null` 과 `undefined` | `false` | `true` |
+| `null` 과 `0` | `false` | `false` |
+| `NaN` 과 `NaN` | `false` | `false` |
+| `{}` 와 `{}` | `false` | `false` |
+
+---
+
+## !==, !=
+
+`!==` 는 `===` 의 결과를 뒤집은 것이고, `!=` 는 `==` 의 결과를 뒤집은 것이다.
+
+```javascript
+console.log('1' !== 1);             // true
+console.log('1' != 1);              // false
+console.log(null !== undefined);    // true
+console.log(null != undefined);     // false
+```
+
+---
+
+## 정리
+
+- 타입: 값의 종류. 기본형 일곱 가지와 객체가 있다.
+- `typeof`: 타입 이름을 문자열로 돌려준다. `null` 과 배열은 `'object'`, 함수는 `'function'` 이다.
+- `undefined`: 값이 정해지지 않음. 값을 넣지 않은 자리를 읽으면 나온다.
+- `null`: 값이 없음. 코드에서 직접 넣는다.
+- 형변환: 값을 다른 타입의 값으로 바꾸는 것. 함수로 직접 하면 명시적, 연산자가 자동으로 하면 암묵적이다.
+- `+` 연산자: 한쪽이라도 문자열이면 연결, 아니면 덧셈이다.
+- 대소 비교 연산자: 양쪽 모두 문자열이면 글자 순서로, 아니면 숫자로 비교한다.
+- `===`: 형변환 없이 타입과 값을 비교한다.
+- `==`: 타입이 다르면 형변환을 한 뒤 비교한다.
+- `!==`, `!=`: 각각 `===`, `==` 의 반대다.
+
+---
+
+## Q&A
+
+### Q1. 사칙연산의 부동소수점 오차
+
+> JS 에서도 사칙연산을 할 때 부동소수점 문제가 발생하는가?
+{: .prompt-info }
+
+<details markdown="1">
+<summary>답변 보기</summary>
+
+> 발생한다. number 타입은 정수와 실수를 구분하지 않고 모든 숫자를 64비트 부동소수점으로 저장하기 때문이다.
+{: .prompt-tip }
+
+- 소수: 2진수로 정확히 표현할 수 없는 소수(`0.1`, `0.2` 등)는 가장 가까운 값으로 저장되므로 계산 결과에 오차가 생긴다.
+- 정수: `9007199254740991`(2의 53제곱 - 1)까지는 오차 없이 계산된다.
+- 대응: 정수로 바꿔 계산한 뒤 되돌리거나, 결과를 필요한 자리에서 반올림한다.
+
+```javascript
+console.log(0.1 + 0.2);                             // 0.30000000000000004
+console.log(0.1 + 0.2 === 0.3);                     // false
+console.log(0.57 * 100);                            // 56.99999999999999
+
+console.log((0.1 * 10 + 0.2 * 10) / 10);            // 0.3  (정수로 바꿔 계산)
+console.log(Math.round((0.1 + 0.2) * 100) / 100);   // 0.3  (소수 둘째 자리에서 반올림)
+```
+
+</details>
