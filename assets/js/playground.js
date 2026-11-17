@@ -1,18 +1,29 @@
 /*
- * 오른쪽 패널의 [정보 / JS] 전환과 JS 실행기.
+ * 화면 아래에서 열리는 JS 실행기.
  *
- * 입력한 코드는 Web Worker(별도 스레드)에서 실행한다.
- * - 무한 반복을 넣어도 화면이 멈추지 않고, 시간이 지나면 중단할 수 있다.
- * - 화면(document, window)에는 접근할 수 없다. 언어 기능, Promise, 타이머를 확인하는 용도다.
+ * - 사이드바의 JS 버튼(#js-toggle)으로 열고 닫는다.
+ * - 입력한 코드는 Web Worker(별도 스레드)에서 실행한다.
+ *   무한 반복을 넣어도 화면이 멈추지 않고, 시간이 지나면 중단할 수 있다.
+ *   화면(document, window)에는 접근할 수 없다. 언어 기능, Promise, 타이머를 확인하는 용도다.
+ * - 코드 색상 표시는 CodeMirror 를 쓴다. 처음 열 때 내려받고, 실패하면 일반 입력창으로 동작한다.
  */
 (function () {
   'use strict';
 
-  var TAB_KEY = 'panel-tab';
+  var OPEN_KEY = 'js-playground-open';
   var CODE_KEY = 'js-playground-code';
   var RUN_LIMIT_MS = 10000;     // 이 시간 안에 끝나지 않으면 중단한다
   var IDLE_LIMIT_MS = 10000;    // 끝난 뒤에도 타이머 콜백이 올 수 있어 이만큼 더 기다린다
   var MAX_LINES = 500;
+
+  var CM_BASE = 'https://cdn.jsdelivr.net/npm/codemirror@5.65.16/';
+  var CM_STYLE = CM_BASE + 'lib/codemirror.min.css';
+  var CM_SCRIPTS = [
+    CM_BASE + 'lib/codemirror.min.js',
+    CM_BASE + 'mode/javascript/javascript.min.js',
+    CM_BASE + 'addon/edit/matchbrackets.min.js',
+    CM_BASE + 'addon/edit/closebrackets.min.js',
+  ];
 
   var DEFAULT_CODE = [
     "const rows = [10, 9, 1, 100];",
@@ -21,17 +32,18 @@
     "console.log(rows.sort((a, b) => a - b));",
   ].join('\n');
 
-  var wrapper = document.getElementById('panel-wrapper');
-  var info = document.getElementById('panel-info');
-  var js = document.getElementById('panel-js');
-  if (!wrapper || !info || !js) return;
+  var drawer = document.getElementById('js-drawer');
+  var toggle = document.getElementById('js-toggle');
+  if (!drawer || !toggle) return;
 
-  var tabs = wrapper.querySelectorAll('.panel-tab');
   var code = document.getElementById('js-code');
   var output = document.getElementById('js-output');
   var runButton = document.getElementById('js-run');
   var clearButton = document.getElementById('js-clear');
-  var wideButton = document.getElementById('js-wide');
+  var closeButton = document.getElementById('js-close');
+
+  var editor = null;            // CodeMirror 인스턴스. 내려받기 전이나 실패했을 때는 null
+  var editorRequested = false;
 
   function load(key) {
     try { return window.localStorage.getItem(key); } catch (e) { return null; }
@@ -41,25 +53,88 @@
     try { window.localStorage.setItem(key, value); } catch (e) { /* 저장소를 쓸 수 없는 환경 */ }
   }
 
-  /* ---------- 탭 전환 ---------- */
-
-  function showTab(name) {
-    var isJs = name === 'js';
-    info.hidden = isJs;
-    js.hidden = !isJs;
-    for (var i = 0; i < tabs.length; i++) {
-      var active = tabs[i].getAttribute('data-panel') === name;
-      tabs[i].classList.toggle('active', active);
-      tabs[i].setAttribute('aria-selected', active ? 'true' : 'false');
-    }
-    save(TAB_KEY, name);
+  function getCode() {
+    return editor ? editor.getValue() : code.value;
   }
 
-  for (var i = 0; i < tabs.length; i++) {
-    tabs[i].addEventListener('click', function (e) {
-      showTab(e.currentTarget.getAttribute('data-panel'));
+  /* ---------- 코드 색상 표시 (CodeMirror) ---------- */
+
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      var script = document.createElement('script');
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = function () { reject(new Error(src)); };
+      document.head.appendChild(script);
     });
   }
+
+  function loadEditor() {
+    if (editorRequested) return;
+    editorRequested = true;
+
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = CM_STYLE;
+    document.head.appendChild(link);
+
+    // 순서대로 내려받는다. 뒤의 파일은 앞의 파일이 만든 CodeMirror 를 쓴다.
+    var chain = Promise.resolve();
+    CM_SCRIPTS.forEach(function (src) {
+      chain = chain.then(function () { return loadScript(src); });
+    });
+
+    chain.then(function () {
+      editor = window.CodeMirror.fromTextArea(code, {
+        mode: 'javascript',
+        theme: 'blog',
+        lineNumbers: true,
+        indentUnit: 4,
+        tabSize: 4,
+        matchBrackets: true,
+        autoCloseBrackets: true,
+        extraKeys: {
+          'Ctrl-Enter': run,
+          'Cmd-Enter': run,
+          Tab: function (cm) {
+            if (cm.somethingSelected()) cm.indentSelection('add');
+            else cm.replaceSelection('    ', 'end');
+          },
+        },
+      });
+
+      editor.on('change', function () {
+        save(CODE_KEY, editor.getValue());
+      });
+
+      editor.refresh();
+    }).catch(function () {
+      // 내려받지 못하면 일반 입력창을 그대로 쓴다.
+    });
+  }
+
+  /* ---------- 열기와 닫기 ---------- */
+
+  function setOpen(open) {
+    drawer.hidden = !open;
+    document.body.classList.toggle('js-open', open);
+    toggle.classList.toggle('active', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    save(OPEN_KEY, open ? '1' : '0');
+
+    if (open) {
+      loadEditor();
+      if (editor) editor.refresh();
+    }
+  }
+
+  toggle.addEventListener('click', function () {
+    setOpen(drawer.hidden);
+  });
+
+  closeButton.addEventListener('click', function () {
+    setOpen(false);
+  });
 
   /* ---------- 결과 출력 ---------- */
 
@@ -217,9 +292,11 @@
   }
 
   function run() {
+    var source = getCode();
+
     stop();
     clearOutput();
-    save(CODE_KEY, code.value);
+    save(CODE_KEY, source);
 
     if (!window.Worker) {
       print('error', '이 브라우저에서는 실행할 수 없습니다.');
@@ -227,8 +304,8 @@
     }
 
     if (!workerUrl) {
-      var source = '(' + workerMain.toString() + ')();';
-      workerUrl = URL.createObjectURL(new Blob([source], { type: 'application/javascript' }));
+      var workerSource = '(' + workerMain.toString() + ')();';
+      workerUrl = URL.createObjectURL(new Blob([workerSource], { type: 'application/javascript' }));
     }
 
     var current = new Worker(workerUrl);
@@ -266,7 +343,7 @@
       print('error', (RUN_LIMIT_MS / 1000) + '초 안에 끝나지 않아 중단했습니다.');
     }, RUN_LIMIT_MS);
 
-    current.postMessage({ code: code.value });
+    current.postMessage({ code: source });
   }
 
   runButton.addEventListener('click', run);
@@ -276,11 +353,7 @@
     clearOutput();
   });
 
-  wideButton.addEventListener('click', function () {
-    var wide = js.classList.toggle('js-wide');
-    wideButton.setAttribute('aria-pressed', wide ? 'true' : 'false');
-    wideButton.textContent = wide ? '좁게' : '넓게';
-  });
+  /* ---------- 일반 입력창 (CodeMirror 를 내려받기 전이나 실패했을 때) ---------- */
 
   code.addEventListener('keydown', function (e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -307,5 +380,5 @@
 
   var savedCode = load(CODE_KEY);
   code.value = savedCode === null ? DEFAULT_CODE : savedCode;
-  showTab(load(TAB_KEY) === 'js' ? 'js' : 'info');
+  setOpen(load(OPEN_KEY) === '1');
 })();

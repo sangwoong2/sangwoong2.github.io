@@ -1,13 +1,16 @@
-<!-- 오른쪽 패널의 JS 실행기. 동작은 assets/js/playground.js -->
-<div id="js-playground">
-  <div class="panel-heading">JS 실행</div>
-  <textarea id="js-code" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="실행할 JS 코드"></textarea>
-  <div class="js-actions">
+<!-- 화면 아래에서 열리는 JS 실행기. 사이드바의 JS 버튼으로 열고 닫는다. 동작은 assets/js/playground.js -->
+<div id="js-drawer" hidden>
+  <div class="js-bar">
+    <span class="js-title">JS 실행</span>
     <button type="button" id="js-run">실행</button>
     <button type="button" id="js-clear">지우기</button>
-    <button type="button" id="js-wide" aria-pressed="false">넓게</button>
     <span class="js-hint">Ctrl + Enter</span>
+    <button type="button" id="js-close" aria-label="닫기" title="닫기"><i class="fas fa-times"></i></button>
   </div>
-  <div class="panel-heading">결과</div>
-  <div id="js-output" aria-live="polite"></div>
+  <div class="js-body">
+    <div class="js-editor">
+      <textarea id="js-code" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="실행할 JS 코드"></textarea>
+    </div>
+    <div id="js-output" aria-live="polite"></div>
+  </div>
 </div>

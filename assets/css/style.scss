@@ -11,116 +11,131 @@ $tab-count: {{ site.tabs | size | plus: 1 }}; // plus 1 for home tab
 
 /* append your custom style below */
 
-/* ---------- 오른쪽 패널: [정보 / JS] 전환 ---------- */
+/* ---------- 사이드바의 JS 버튼 ---------- */
 
-#panel-tabs {
+#sidebar .sidebar-bottom #js-toggle {
+  width: 2.4rem;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  color: rgba(117, 117, 117, 0.9);
+  text-align: center;
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
+  &:hover,
+  &.active {
+    color: var(--sidebar-active-color);
+  }
+}
+
+/* ---------- JS 실행기: 화면 아래에서 열리는 영역 ---------- */
+
+$js-drawer-height: 42vh;
+
+/* 코드 색상. 테마의 밝은 화면 / 어두운 화면 전환을 따른다. */
+@mixin js-light-colors {
+  --js-keyword: #d73a49;
+  --js-string: #032f62;
+  --js-number: #005cc5;
+  --js-comment: #6a737d;
+  --js-def: #6f42c1;
+  --js-property: #005cc5;
+  --js-selection: #c8e1ff;
+  --js-line-number: #b0b6bd;
+  --js-warn: #b08800;
+  --js-error: #d73a49;
+}
+
+@mixin js-dark-colors {
+  --js-keyword: #ff7b72;
+  --js-string: #a5d6ff;
+  --js-number: #79c0ff;
+  --js-comment: #8b949e;
+  --js-def: #d2a8ff;
+  --js-property: #79c0ff;
+  --js-selection: #264f78;
+  --js-line-number: #6e7681;
+  --js-warn: #d29922;
+  --js-error: #ff7b72;
+}
+
+html {
+  @media (prefers-color-scheme: light) {
+    &:not([data-mode]),
+    &[data-mode="light"] {
+      @include js-light-colors;
+    }
+
+    &[data-mode="dark"] {
+      @include js-dark-colors;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &:not([data-mode]),
+    &[data-mode="dark"] {
+      @include js-dark-colors;
+    }
+
+    &[data-mode="light"] {
+      @include js-light-colors;
+    }
+  }
+}
+
+/* 열려 있는 동안 본문의 끝이 가려지지 않게 아래를 비운다 */
+body.js-open {
+  padding-bottom: $js-drawer-height;
+
+  #back-to-top {
+    bottom: calc(#{$js-drawer-height} + 1rem);
+  }
+}
+
+#js-drawer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
   display: flex;
-  justify-content: flex-end;
-  margin-top: 1rem;
-  padding-right: 0.5rem;
+  flex-direction: column;
+  height: $js-drawer-height;
+  min-height: 15rem;
+  border-top: 1px solid var(--btn-border-color);
+  background: var(--main-bg);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.12);
+  color: var(--text-color);
 
-  .panel-tab {
-    padding: 0.15rem 0.8rem;
-    border: 1px solid var(--btn-border-color);
-    background: var(--button-bg);
-    color: var(--text-muted-color);
-    font-size: 0.8rem;
-    line-height: 1.5;
-    cursor: pointer;
+  &[hidden] {
+    display: none;
+  }
 
-    &:first-child {
-      border-radius: 0.8rem 0 0 0.8rem;
-    }
+  .js-bar {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    padding: 0.4rem 1rem;
+    border-bottom: 1px solid var(--main-border-color);
 
-    &:last-child {
-      border-left: 0;
-      border-radius: 0 0.8rem 0.8rem 0;
-    }
-
-    &:focus {
-      outline: none;
-    }
-
-    &.active {
-      color: var(--link-color);
+    .js-title {
+      margin-right: 1rem;
+      color: var(--label-color);
       font-weight: 600;
     }
-  }
-}
-
-/* 정보 영역은 감싸는 상자를 만들지 않는다.
-   안의 요소들이 예전처럼 #panel-wrapper 를 기준으로 화면에 붙어 따라온다. */
-#panel-info {
-  display: contents;
-
-  &[hidden] {
-    display: none;
-  }
-
-  .access {
-    margin-top: 1rem;
-  }
-}
-
-/* ---------- JS 실행기 ---------- */
-
-#panel-js {
-  position: -webkit-sticky;
-  position: sticky;
-  top: 2rem;
-  margin-top: 1rem;
-  padding: 0 0.5rem 0 1rem;
-  border-left: 1px solid var(--main-border-color);
-
-  &[hidden] {
-    display: none;
-  }
-
-  .panel-heading {
-    margin-bottom: 0.5rem;
-  }
-
-  #js-code,
-  #js-output {
-    box-sizing: border-box;
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid var(--btn-border-color);
-    border-radius: 0.4rem;
-    background: var(--main-bg);
-    color: var(--text-color);
-    font-family: Consolas, "Courier New", monospace;
-    font-size: 0.8rem;
-    line-height: 1.5;
-  }
-
-  #js-code {
-    display: block;
-    height: 14rem;
-    resize: vertical;
-    overflow: auto;
-    white-space: pre;
-    tab-size: 4;
-
-    &:focus {
-      outline: none;
-      border-color: var(--link-color);
-    }
-  }
-
-  .js-actions {
-    display: flex;
-    align-items: center;
-    margin: 0.5rem 0 1rem;
 
     button {
       margin-right: 0.35rem;
-      padding: 0.15rem 0.6rem;
+      padding: 0.15rem 0.7rem;
       border: 1px solid var(--btn-border-color);
       border-radius: 0.4rem;
       background: var(--button-bg);
       color: var(--text-color);
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       cursor: pointer;
 
       &:hover {
@@ -138,14 +153,61 @@ $tab-count: {{ site.tabs | size | plus: 1 }}; // plus 1 for home tab
     }
 
     .js-hint {
+      margin-left: 0.5rem;
+      color: var(--text-muted-color);
+      font-size: 0.75rem;
+    }
+
+    #js-close {
       margin-left: auto;
-      font-size: 0.7rem;
+      margin-right: 0;
+      border-color: transparent;
+      background: transparent;
+    }
+  }
+
+  .js-body {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .js-editor {
+    flex: 1 1 60%;
+    min-width: 0;
+    border-right: 1px solid var(--main-border-color);
+  }
+
+  #js-code,
+  #js-output {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  /* 에디터를 내려받기 전에 보이는 일반 입력창 */
+  #js-code {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    padding: 0.5rem 1rem;
+    border: 0;
+    background: var(--main-bg);
+    color: var(--text-color);
+    resize: none;
+    white-space: pre;
+    tab-size: 4;
+
+    &:focus {
+      outline: none;
     }
   }
 
   #js-output {
-    min-height: 6rem;
-    max-height: 22rem;
+    flex: 1 1 40%;
+    min-width: 0;
+    padding: 0.5rem 1rem;
     overflow: auto;
 
     .js-line {
@@ -154,11 +216,11 @@ $tab-count: {{ site.tabs | size | plus: 1 }}; // plus 1 for home tab
     }
 
     .js-warn {
-      color: #b08800;
+      color: var(--js-warn);
     }
 
     .js-error {
-      color: #d73a49;
+      color: var(--js-error);
     }
 
     .js-info {
@@ -166,25 +228,91 @@ $tab-count: {{ site.tabs | size | plus: 1 }}; // plus 1 for home tab
     }
   }
 
-  /* 넓게: 패널 폭을 벗어나 화면 오른쪽에 띄운다 */
-  &.js-wide {
-    position: fixed;
-    top: 4rem;
-    right: 1rem;
-    z-index: 100;
-    width: 42rem;
-    max-width: 55vw;
-    max-height: calc(100vh - 5rem);
-    margin-top: 0;
-    padding: 1rem;
-    overflow: auto;
-    border: 1px solid var(--btn-border-color);
-    border-radius: 0.5rem;
-    background: var(--main-bg);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  /* ---------- 에디터(CodeMirror)의 모양 ---------- */
 
-    #js-code {
-      height: 20rem;
+  .CodeMirror {
+    height: 100%;
+    background: var(--main-bg);
+    color: var(--text-color);
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .CodeMirror-gutters {
+    border-right: 1px solid var(--main-border-color);
+    background: var(--main-bg);
+  }
+
+  .CodeMirror-linenumber {
+    color: var(--js-line-number);
+  }
+
+  .CodeMirror-cursor {
+    border-left-color: var(--text-color);
+  }
+
+  .CodeMirror-selected,
+  .CodeMirror-focused .CodeMirror-selected {
+    background: var(--js-selection);
+  }
+
+  .CodeMirror-matchingbracket {
+    outline: 1px solid var(--js-comment);
+    color: inherit !important;
+  }
+
+  .cm-s-blog {
+    .cm-keyword { color: var(--js-keyword); }
+    .cm-string,
+    .cm-string-2 { color: var(--js-string); }
+    .cm-number,
+    .cm-atom { color: var(--js-number); }
+    .cm-comment { color: var(--js-comment); }
+    .cm-def { color: var(--js-def); }
+    .cm-property { color: var(--js-property); }
+    .cm-variable,
+    .cm-variable-2,
+    .cm-operator { color: var(--text-color); }
+  }
+}
+
+/* 사이드바가 보이는 화면에서는 사이드바 오른쪽에서 시작한다 */
+@media all and (min-width: 850px) {
+  #js-drawer {
+    left: $sidebar-width-small;
+  }
+}
+
+@media all and (min-width: 1200px) {
+  #js-drawer {
+    left: $sidebar-width;
+  }
+}
+
+@media all and (min-width: 1650px) {
+  #js-drawer {
+    left: $sidebar-width-large;
+  }
+}
+
+/* 좁은 화면에서는 입력창과 결과창을 위아래로 둔다 */
+@media all and (max-width: 849px) {
+  #js-drawer {
+    .js-body {
+      flex-direction: column;
+    }
+
+    .js-editor {
+      flex: 1 1 55%;
+      min-height: 0;
+      border-right: 0;
+      border-bottom: 1px solid var(--main-border-color);
+    }
+
+    #js-output {
+      flex: 1 1 45%;
+      min-height: 0;
     }
   }
 }
