@@ -1,0 +1,13 @@
+<!-- 오른쪽 패널의 JS 실행기. 동작은 assets/js/playground.js -->
+<div id="js-playground">
+  <div class="panel-heading">JS 실행</div>
+  <textarea id="js-code" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="실행할 JS 코드"></textarea>
+  <div class="js-actions">
+    <button type="button" id="js-run">실행</button>
+    <button type="button" id="js-clear">지우기</button>
+    <button type="button" id="js-wide" aria-pressed="false">넓게</button>
+    <span class="js-hint">Ctrl + Enter</span>
+  </div>
+  <div class="panel-heading">결과</div>
+  <div id="js-output" aria-live="polite"></div>
+</div>

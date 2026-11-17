@@ -37,18 +37,32 @@ layout: default
   <!-- panel -->
   <div id="panel-wrapper" class="col-xl-3 pl-2 text-muted">
 
-    <div class="access">
-      {% include update-list.html %}
-      {% include trending-tags.html %}
+    <!-- 패널 전환: 정보(최근 글, 목차) / JS(실행기) -->
+    <div id="panel-tabs" role="tablist">
+      <button type="button" class="panel-tab active" data-panel="info" role="tab" aria-selected="true">정보</button>
+      <button type="button" class="panel-tab" data-panel="js" role="tab" aria-selected="false">JS</button>
     </div>
 
-    {% for _include in layout.panel_includes %}
-      {% assign _include_path = _include | append: '.html' %}
-      {% include {{ _include_path }} %}
-    {% endfor %}
+    <div id="panel-info">
+      <div class="access">
+        {% include update-list.html %}
+        {% include trending-tags.html %}
+      </div>
+
+      {% for _include in layout.panel_includes %}
+        {% assign _include_path = _include | append: '.html' %}
+        {% include {{ _include_path }} %}
+      {% endfor %}
+    </div>
+
+    <div id="panel-js" hidden>
+      {% include js-playground.html %}
+    </div>
   </div>
 
 </div>
+
+<script defer src="{{ '/assets/js/playground.js' | relative_url }}"></script>
 
 <!-- tail -->
 {% if layout.tail_includes %}

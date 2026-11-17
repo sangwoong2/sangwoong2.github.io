@@ -10,3 +10,181 @@ $tab-count: {{ site.tabs | size | plus: 1 }}; // plus 1 for home tab
 @import "{{ site.theme }}";
 
 /* append your custom style below */
+
+/* ---------- 오른쪽 패널: [정보 / JS] 전환 ---------- */
+
+#panel-tabs {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-right: 0.5rem;
+
+  .panel-tab {
+    padding: 0.15rem 0.8rem;
+    border: 1px solid var(--btn-border-color);
+    background: var(--button-bg);
+    color: var(--text-muted-color);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    cursor: pointer;
+
+    &:first-child {
+      border-radius: 0.8rem 0 0 0.8rem;
+    }
+
+    &:last-child {
+      border-left: 0;
+      border-radius: 0 0.8rem 0.8rem 0;
+    }
+
+    &:focus {
+      outline: none;
+    }
+
+    &.active {
+      color: var(--link-color);
+      font-weight: 600;
+    }
+  }
+}
+
+/* 정보 영역은 감싸는 상자를 만들지 않는다.
+   안의 요소들이 예전처럼 #panel-wrapper 를 기준으로 화면에 붙어 따라온다. */
+#panel-info {
+  display: contents;
+
+  &[hidden] {
+    display: none;
+  }
+
+  .access {
+    margin-top: 1rem;
+  }
+}
+
+/* ---------- JS 실행기 ---------- */
+
+#panel-js {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 2rem;
+  margin-top: 1rem;
+  padding: 0 0.5rem 0 1rem;
+  border-left: 1px solid var(--main-border-color);
+
+  &[hidden] {
+    display: none;
+  }
+
+  .panel-heading {
+    margin-bottom: 0.5rem;
+  }
+
+  #js-code,
+  #js-output {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--btn-border-color);
+    border-radius: 0.4rem;
+    background: var(--main-bg);
+    color: var(--text-color);
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+
+  #js-code {
+    display: block;
+    height: 14rem;
+    resize: vertical;
+    overflow: auto;
+    white-space: pre;
+    tab-size: 4;
+
+    &:focus {
+      outline: none;
+      border-color: var(--link-color);
+    }
+  }
+
+  .js-actions {
+    display: flex;
+    align-items: center;
+    margin: 0.5rem 0 1rem;
+
+    button {
+      margin-right: 0.35rem;
+      padding: 0.15rem 0.6rem;
+      border: 1px solid var(--btn-border-color);
+      border-radius: 0.4rem;
+      background: var(--button-bg);
+      color: var(--text-color);
+      font-size: 0.8rem;
+      cursor: pointer;
+
+      &:hover {
+        border-color: var(--link-color);
+        color: var(--link-color);
+      }
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    #js-run {
+      font-weight: 600;
+    }
+
+    .js-hint {
+      margin-left: auto;
+      font-size: 0.7rem;
+    }
+  }
+
+  #js-output {
+    min-height: 6rem;
+    max-height: 22rem;
+    overflow: auto;
+
+    .js-line {
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .js-warn {
+      color: #b08800;
+    }
+
+    .js-error {
+      color: #d73a49;
+    }
+
+    .js-info {
+      color: var(--text-muted-color);
+    }
+  }
+
+  /* 넓게: 패널 폭을 벗어나 화면 오른쪽에 띄운다 */
+  &.js-wide {
+    position: fixed;
+    top: 4rem;
+    right: 1rem;
+    z-index: 100;
+    width: 42rem;
+    max-width: 55vw;
+    max-height: calc(100vh - 5rem);
+    margin-top: 0;
+    padding: 1rem;
+    overflow: auto;
+    border: 1px solid var(--btn-border-color);
+    border-radius: 0.5rem;
+    background: var(--main-bg);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+
+    #js-code {
+      height: 20rem;
+    }
+  }
+}
